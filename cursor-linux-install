@@ -1,0 +1,56 @@
+#!/bin/bash
+#
+# This script installs a MANUALLY downloaded Cursor AppImage.
+# It COPIES the file to /opt, leaving the original download untouched.
+
+# Exit immediately if any command fails.
+set -e
+
+# --- !! IMPORTANT !! ---
+# Update this variable to match the exact filename of the AppImage you downloaded.
+APPIMAGE_FILENAME="Cursor-1.3.4-x86_64.AppImage" # <--- EDIT THIS LINE
+
+
+# --- Installation Steps ---
+
+# First, verify the specified file actually exists.
+if [ ! -f ~/"$APPIMAGE_FILENAME" ]; then
+    echo "❌ ERROR: File not found!"
+    echo "Please check that the file named '$APPIMAGE_FILENAME' exists in your home directory (~/)."
+    echo "Also, ensure the APPIMAGE_FILENAME variable in the script is set correctly."
+    exit 1
+fi
+
+echo "✅ File '$APPIMAGE_FILENAME' found. Starting installation..."
+
+# 1. Make the AppImage executable
+echo "Making the AppImage executable..."
+sudo chmod +x ~/"$APPIMAGE_FILENAME"
+
+# 2. Create the application directory in /opt
+echo "Creating directory at /opt/cursor..."
+sudo mkdir -p /opt/cursor
+
+# 3. Copy and rename the AppImage to /opt
+echo "Copying AppImage to /opt/cursor/..."
+sudo cp ~/"$APPIMAGE_FILENAME" /opt/cursor/Cursor.AppImage
+
+# 4. Create the desktop launcher file
+echo "Creating system-wide .desktop launcher file..."
+cat <<EOF | sudo tee /usr/share/applications/cursor.desktop
+[Desktop Entry]
+Name=Cursor
+Comment=The AI-first Code Editor
+Exec=/opt/cursor/Cursor.AppImage
+Type=Application
+Categories=Development;IDE;TextEditor;
+EOF
+
+# 5. Install necessary system libraries
+echo "Installing required dependencies (libfuse2, libnss3)..."
+sudo apt-get update && sudo apt-get install -y libfuse2 libnss3
+
+# --- Finalization ---
+echo ""
+echo "✅ Script finished successfully."
+echo "Cursor IDE is now installed, and your original download is untouched."
