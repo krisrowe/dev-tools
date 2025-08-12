@@ -2,30 +2,40 @@
 #
 # This script installs a MANUALLY downloaded Cursor AppImage.
 # It COPIES the file to /opt, leaving the original download untouched.
+#
+# Refactored to accept the AppImage file as a command-line argument.
 
 # Exit immediately if any command fails.
 set -e
 
-# --- !! IMPORTANT !! ---
-# Update this variable to match the exact filename of the AppImage you downloaded.
-APPIMAGE_FILENAME="Cursor-1.3.4-x86_64.AppImage" # <--- EDIT THIS LINE
+# --- Script Argument ---
+APPIMAGE_FILENAME="$1"
 
+# --- Validation and Help ---
 
-# --- Installation Steps ---
+# Check if an argument was provided.
+if [ -z "$APPIMAGE_FILENAME" ]; then
+    echo "Usage: $0 <path_to_appimage>"
+    echo "Example: $0 ~/Downloads/Cursor-1.4.2-x86_64.AppImage"
+    echo "Please provide the path to the Cursor AppImage file."
+    exit 1
+fi
 
-# First, verify the specified file actually exists.
-if [ ! -f ~/"$APPIMAGE_FILENAME" ]; then
+# Check if the provided file exists.
+if [ ! -f "$APPIMAGE_FILENAME" ]; then
     echo "❌ ERROR: File not found!"
-    echo "Please check that the file named '$APPIMAGE_FILENAME' exists in your home directory (~/)."
-    echo "Also, ensure the APPIMAGE_FILENAME variable in the script is set correctly."
+    echo "The file '$APPIMAGE_FILENAME' does not exist."
+    echo "Please check the path and try again."
     exit 1
 fi
 
 echo "✅ File '$APPIMAGE_FILENAME' found. Starting installation..."
 
+# --- Installation Steps ---
+
 # 1. Make the AppImage executable
 echo "Making the AppImage executable..."
-sudo chmod +x ~/"$APPIMAGE_FILENAME"
+sudo chmod +x "$APPIMAGE_FILENAME"
 
 # 2. Create the application directory in /opt
 echo "Creating directory at /opt/cursor..."
@@ -33,7 +43,7 @@ sudo mkdir -p /opt/cursor
 
 # 3. Copy and rename the AppImage to /opt
 echo "Copying AppImage to /opt/cursor/..."
-sudo cp ~/"$APPIMAGE_FILENAME" /opt/cursor/Cursor.AppImage
+sudo cp "$APPIMAGE_FILENAME" /opt/cursor/Cursor.AppImage
 
 # 4. Create the desktop launcher file
 echo "Creating system-wide .desktop launcher file..."
